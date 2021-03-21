@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <title>COMP 4537 Lab #2 - User</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous" />
+    <link rel="stylesheet" href="./css/styles.css" />
+</head>
+
+<body>
+    <h1>User Page</h1>
+    <div class="mainWidth" id="main">
+        <div id="errorMessage" hidden=true>
+            <span>Nope, no questions today! Please add questions using the</span>
+            <a href="admin.html"> admin </a>
+            <span>page</span>
+        </div>
+    </div>
+    <br>
+    <div class="buttons">
+        <button id="submitButton" type="button" onclick="submit()" class="btn btn-primary">Submit</button>
+    </div>
+    <div id="results"></div>
+    <a href="./index.html" class="btn btn-secondary" id="back-btn">Back to assignment home page</a>
+
+    <script src="./js/user.js"></script>
+</body>
+
+</html>

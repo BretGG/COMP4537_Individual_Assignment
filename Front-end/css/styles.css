@@ -1,0 +1,65 @@
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:ital@0;1&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Courier+Prime&display=swap");
+body {
+    padding-left: 4%;
+    padding-bottom: 4%;
+    font-family: "Fraunces", serif;
+}
+
+textarea {
+    width: 100%;
+}
+
+.mainWidth {
+    width: 30em;
+}
+
+.radio {
+    margin-right: 1em;
+    margin-top: 0.5em;
+    vertical-align: middle;
+}
+
+.code {
+    font-family: "Courier Prime", monospace;
+}
+
+.red {
+    color: red;
+}
+
+.blue {
+    color: blue;
+}
+
+.green {
+    color: green;
+}
+
+#back-btn {
+    margin-top: 3rem;
+}
+
+.buttons button {
+    margin-right: 3em;
+}
+
+.answer {
+    display: flex;
+    justify-content: left;
+    height: 6em;
+}
+
+.qBody {
+    margin: 1em;
+    height: 6em;
+}
+
+.answerTag {
+    margin-left: 1em;
+}
+
+
+/* .ansBody {
+    padding: 1em;
+} */
