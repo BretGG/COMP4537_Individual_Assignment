@@ -1,19 +1,21 @@
 const mysql = require('mysql');
 const http = require('http');
 
+// Public in git, should be in a env variable but nothing much to hide here
+const sqlConnection = mysql.createConnection({
+    host: 'localhost',
+    user: 'bretgetz_admin',
+    password: 'S0meth1ng!',
+    database: 'bretgetz_individual_assignment'
+});
+
 // const sqlConnection = mysql.createConnection({
 //     host: 'localhost',
-//     user: 'bretgetz_admin',
-//     password: 'S0meth1ng!',
+//     user: 'root',
+//     password: 'password',
 //     database: 'bretgetz_individual_assignment'
 // });
 
-const sqlConnection = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'password',
-    database: 'bretgetz_individual_assignment'
-});
 
 sqlConnection.connect(err => {
     if (err) {
@@ -25,20 +27,27 @@ sqlConnection.connect(err => {
 });
 
 var server = http.createServer(function(req, res) {
-    console.log(req.method);
+    console.log(req.method, req.url);
     res.setHeader('Content-Type', 'application/json;charset=utf-8');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+
+    if (req.method === "OPTIONS") {
+        res.setHeader("Access-Control-Allow-Methods", "PUT, DELETE, POST, GET");
+        res.end();
+    }
+
     switch (req.method) {
         case 'GET':
-            get(req, res);
+            getQuestions(req, res);
             break;
         case 'POST':
-            post(req, res);
+            postQuestion(req, res);
             break;
         case 'PUT':
-            put(req, res);
+            putQuestion(req, res);
             break;
         case 'DELETE':
-            remove(req, res);
+            removeQuestion(req, res);
             break;
     }
 });
@@ -47,7 +56,7 @@ server.listen(5050, () => {
     console.log("listening...");
 });
 
-function get(req, res) {
+function getQuestions(req, res) {
     let quiz = {
         questions: []
     };
@@ -75,7 +84,7 @@ function get(req, res) {
     })
 };
 
-function post(req, res) {
+function postQuestion(req, res) {
 
     getData(req).then(data => {
         sqlConnection.query(`INSERT INTO question (question, quizId, correctAnswer) VALUES ('${data.question}', 1, '${data.correctAnswer}');`);
@@ -86,21 +95,21 @@ function post(req, res) {
                 return res.status(500).send("Failed sql query");
             }
 
-            questionId = results[0]['LAST_INSERT_ID()'];
+            data.id = results[0]['LAST_INSERT_ID()'];
 
             for (let answer of data.answers)
-                sqlConnection.query(`INSERT INTO answer (answer, questionId) VALUES ('${answer}', ${questionId});`);
+                sqlConnection.query(`INSERT INTO answer (answer, questionId) VALUES ('${answer}', ${data.id});`);
 
             res.end(JSON.stringify(data));
         });
     })
 };
 
-function put(req, res) {
+function putQuestion(req, res) {
     getData(req).then(data => {
-        questionId = data.questionId;
+        questionId = data.id;
 
-        sqlConnection.query(`UPDATE question SET question = '${data.question}', correctAnswer = ${data.correctAnswer} WHERE id = ${data.questionId};`);
+        sqlConnection.query(`UPDATE question SET question = '${data.question}', correctAnswer = ${data.correctAnswer} WHERE id = ${questionId};`);
         sqlConnection.query(`DELETE FROM answer WHERE questionId = ${questionId};`);
 
         let answers = data.answers;
@@ -111,9 +120,9 @@ function put(req, res) {
     })
 };
 
-function remove(req, res) {
+function removeQuestion(req, res) {
     getData(req).then(data => {
-        sqlConnection.query(`DELETE FROM question WHERE id = ${data.questionId};`);
+        sqlConnection.query(`DELETE FROM question WHERE id = ${data.id};`);
         res.end(JSON.stringify(data));
     });
 };

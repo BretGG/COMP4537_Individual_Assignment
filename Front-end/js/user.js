@@ -1,51 +1,65 @@
 const key = "quiz";
-const error = "ERROR: can't access localStorage";
 let questions = [];
 let questionCount = 0; // contains number of questions
 let userAnswers = []; // contains user's answers
-let ansKeys = []; // contains answer keys
+let ansKeys = []; // contain
 
-// TODO: Getting existing localStorage
-function getStorage() {
-    let data;
-    if (!Storage) {
-        console.log(error);
-    } else {
-        data = localStorage.getItem(key); // returns a JSON string!
+// Question class for containing question info
+function Question(id, body, answers, key) {
+    this.id = id; // contains question #
+    this.body = body; // contains question text
+    this.answers = answers; // contains array of text areas
+    this.key = key; // contains the correct answer's id
+
+    console.log(id, body, answers, key);
+
+    this.getSaveObject = function() {
+        return {
+            id: this.id,
+            question: this.body,
+            answers: this.answers,
+            correctAnswer: this.key
+        }
     }
-    if (data) {
-        questions = JSON.parse(data);
-        questionCount = questions.length;
-    }
-    console.log("Loaded questions", questions); // parsing back to JSON object
+
+    this.assignBody = function(newBody) {
+        this.body = newBody;
+    };
+
+    this.assignAnswers = function(newAnswers) {
+        this.answers = newAnswers;
+    };
+
+    this.assignKey = function(newKey) {
+        this.key = newKey;
+    };
 }
 
 // TODO: Rendering DOM from data grabbed from localStorage
 function render() {
-    if (questionCount <= 0) {
+    console.log('here', questions);
+    if (questions.length <= 0) {
         document.getElementById("errorMessage").hidden = false;
         document.getElementById("submitButton").hidden = true;
         return;
     }
 
     // Iterating through questions array
-    for (let i = 0; i < questionCount; i++) {
-        let body = questions[i].body;
-        let answers = questions[i].answers;
-        ansKeys.push(questions[i].key);
+    for (var questionObject of questions) {
+        let body = questionObject.body;
+        let answers = questionObject.answers;
+        ansKeys.push(questionObject.key);
 
         let question = document.createElement("div");
-        question.id = "question" + i;
+        question.id = "question" + questionObject.id;
 
         // Rendering question title and body
         let label = document.createElement("p");
-        let text = document.createTextNode("Question " + (i + 1));
-        label.appendChild(text);
 
         let qBody = document.createElement("textarea");
         let qText = document.createTextNode(body);
         qBody.className = "qBody";
-        qBody.id = "qBody" + i;
+        qBody.id = "qBody" + questionObject.id;
         qBody.disabled = true;
         qBody.appendChild(qText);
 
@@ -55,7 +69,7 @@ function render() {
         // Rendering MC answers
         let ansBody = document.createElement("div");
         ansBody.className = "ansBody";
-        ansBody.id = "ansBody" + i;
+        ansBody.id = "ansBody" + questionObject.id;
 
         // Rendering radio buttons/answers
         for (let j = 0; j < answers.length; j++) {
@@ -66,7 +80,7 @@ function render() {
             // radio btn for choosing ans key
             let radio = document.createElement("input");
             radio.setAttribute("type", "radio");
-            radio.setAttribute("name", "key" + i);
+            radio.setAttribute("name", "key" + questionObject.id);
             radio.classList.add("radio");
             radio.value = j;
             answer.appendChild(radio);
@@ -85,8 +99,7 @@ function render() {
         document.getElementById("main").appendChild(question);
 
         // Add line between questions
-        if (i != questionCount - 1)
-            document.getElementById("main").appendChild(document.createElement("hr"));
+        document.getElementById("main").appendChild(document.createElement("hr"));
     }
 }
 
@@ -131,9 +144,26 @@ function submit() {
 
     // Set results and hide submit button
     results = document.getElementById("results");
-    results.innerHTML = `Correct: ${totalCorrect} Total: ${questions.length} Result: ${totalCorrect / questions.length}%`
+    results.innerHTML = `Correct: ${totalCorrect} Total: ${questions.length} Result: ${(totalCorrect / questions.length) * 100}%`
     results = document.getElementById("submitButton").hidden = true;
 }
 
-getStorage();
-render();
+
+function getFromDatabase() {
+    console.log("GET database");
+
+    let req = new XMLHttpRequest();
+    req.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+            console.log(JSON.parse(req.responseText));
+            questions = JSON.parse(req.responseText).questions;
+            questions = questions.map(obj => new Question(obj.questionId, obj.question, obj.answers, obj.correctAnswer));
+            console.log(questions);
+            render();
+        }
+    }
+    req.open("GET", "https://bretgetz-bcit.com/COMP4537/labs/assign/database");
+    req.send();
+}
+
+getFromDatabase();
